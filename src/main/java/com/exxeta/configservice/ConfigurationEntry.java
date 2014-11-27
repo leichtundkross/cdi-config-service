@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.google.gson.GsonBuilder;
+
 final class ConfigurationEntry {
 
 	final class Entry {
@@ -39,6 +41,14 @@ final class ConfigurationEntry {
 		if (value != null) {
 			addEntry(value);
 		}
+	}
+	
+	public static ConfigurationEntry fromJsonDocument(String document) {
+		return new GsonBuilder().setPrettyPrinting().create().fromJson(document, ConfigurationEntry.class);
+	}
+
+	public static String toJsonDocument(ConfigurationEntry model) {
+		return new GsonBuilder().setPrettyPrinting().create().toJson(model);
 	}
 
 	List<Entry> getEntries() {

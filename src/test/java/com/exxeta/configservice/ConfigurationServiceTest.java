@@ -7,9 +7,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Date;
-import java.util.Iterator;
 
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.InjectionPoint;
 
@@ -24,17 +22,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.exxeta.configservice.BooleanProperty;
-import com.exxeta.configservice.Configuration;
-import com.exxeta.configservice.ConfigurationEntryBuilder;
-import com.exxeta.configservice.ConfigurationService;
-import com.exxeta.configservice.ConfigurationStore;
-import com.exxeta.configservice.DoubleProperty;
-import com.exxeta.configservice.IntegerProperty;
-import com.exxeta.configservice.ObjectProperty;
-import com.exxeta.configservice.PropertyObject;
-import com.exxeta.configservice.StringProperty;
-
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigurationServiceTest {
 
@@ -43,9 +30,6 @@ public class ConfigurationServiceTest {
 
 	@Mock
 	private ConfigurationStore store;
-
-    @Mock
-    Instance<Configuration> configInstances;
     
 	@Test
 	public void testReadProperty() {
@@ -84,7 +68,6 @@ public class ConfigurationServiceTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	public void testLookupStringProperty_KeinDefaultHinterlegt() {
 		final String propertyKey = "myKey";
 
@@ -94,9 +77,6 @@ public class ConfigurationServiceTest {
 		InjectionPoint ip = mockInjectionPoint(StringProperty.class, property, null);
 
 		Mockito.when(store.readProperty(propertyKey, String.class)).thenReturn(null);
-        Iterator<Configuration> configsIteratorMock = Mockito.mock(Iterator.class);
-        Mockito.when(configsIteratorMock.hasNext()).thenReturn(false);        
-        Mockito.when(configInstances.iterator()).thenReturn(configsIteratorMock);
 
 		String propValue = configService.lookupStringProperty(ip);
 		assertNull(propValue);

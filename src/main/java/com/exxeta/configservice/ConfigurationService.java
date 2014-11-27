@@ -3,7 +3,6 @@ package com.exxeta.configservice;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
@@ -13,9 +12,6 @@ public class ConfigurationService {
 	@Inject
 	private ConfigurationStore store;
 	
-	@Inject
-	private Instance<Configuration> configInstances;
-
 	/**
 	 * Liefert den Wert zu der gesuchten Property. Ist die Property noch nicht in der DB hinterlegt, wird diese dort mit ihrem Default-Wert
 	 * neu angelegt und dieser Wert zurueckgegeben.
@@ -94,22 +90,10 @@ public class ConfigurationService {
 	 */
 	protected <T> T getOrCreateProperty(String propertyName, Class<T> propertyClass, T defaultValue) {
 			T value = store.readProperty(propertyName, propertyClass);			
-			if (isNull(value)) {
-				if (!isNull(defaultValue)) {
-					store.writeProperty(propertyName, ConfigurationEntryBuilder.createConfig().value(defaultValue));
-				}
-				else {
-					// Komplexe Properties haben keine Default-Values,
-					// daher suchen wir in den configInstances nach einem passenden Key
-					for (Configuration config : configInstances) {
-						if (propertyName.equals(config.key())) {
-							store.writeProperty(config.key(), config.initialConfig());
-							value = store.readProperty(propertyName, propertyClass);
-							break;
-						}
-					}
-				}
+			if (isNull(value) && !isNull(defaultValue)) {
+				store.writeProperty(propertyName, ConfigurationEntryBuilder.createConfig().value(defaultValue));
 			}
+
 			return !isNull(value) ? value : (!isNull(defaultValue) ? defaultValue : null);
 	}
     
