@@ -1,0 +1,23 @@
+{
+  "groups": [
+       {
+           "name": "ChuckNorrisGroup",
+           "permissions": {
+               "/": "ALL"
+           }
+       },
+       {
+           "name": "yiggaGroup",
+           "permissions": {
+               "/yigga": "ALL"
+           }
+       },
+       {
+           "name": "notReallyChuck",
+           "permissions": {
+               "/yigga": "ALL",
+               "/chuck": "ALL"
+           }
+       }
+   ]
+}
