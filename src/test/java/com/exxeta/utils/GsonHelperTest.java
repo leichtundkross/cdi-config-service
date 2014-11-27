@@ -163,7 +163,6 @@ public class GsonHelperTest {
 		assertTrue(GsonHelper.isJson(valid));
 	}
 
-	// vgl: http://srv130.bader.de:8080/#/c/2100/
 	@Test
 	public void testIsJsonArrayIndexOOBException() {
 		String notValid = "/";
