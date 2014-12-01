@@ -1,8 +1,7 @@
 package com.exxeta.configservice;
 
 /**
- * Helfer-Klasse zum Zugriff auf Configuration-Entries mit komplexer Struktur. Diese Indirektion
- * wird benoetigt, da wir mittels CDI keine untypisierten Objekte injecten koennen.
+ * This is a helper for injecting properties with complex object structures (since CDI does not support injection of generic types).
  */
 public class PropertyObject<T> {
 
@@ -10,7 +9,7 @@ public class PropertyObject<T> {
 
 	private T value;
 
-	protected PropertyObject(String name, T value) {
+	PropertyObject(String name, T value) {
 		this.name = name;
 		this.value = value;
 	}

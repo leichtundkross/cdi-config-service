@@ -1,12 +1,10 @@
-package com.exxeta.utils;
+package com.exxeta.configservice;
 
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
 import org.junit.Test;
-
-import com.exxeta.utils.TimeService;
 
 public class TimeServiceTest {
 

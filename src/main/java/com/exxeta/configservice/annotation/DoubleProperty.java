@@ -1,4 +1,4 @@
-package com.exxeta.configservice;
+package com.exxeta.configservice.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,9 +7,9 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.FIELD, ElementType.PARAMETER })
-public @interface StringProperty {
+public @interface DoubleProperty {
 
 	String key();
 
-	String defaultValue() default "";
+	double defaultValue() default 0.0;
 }

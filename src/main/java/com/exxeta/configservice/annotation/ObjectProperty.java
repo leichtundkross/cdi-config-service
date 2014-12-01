@@ -1,4 +1,4 @@
-package com.exxeta.configservice;
+package com.exxeta.configservice.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

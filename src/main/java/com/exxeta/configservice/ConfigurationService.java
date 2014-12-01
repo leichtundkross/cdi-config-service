@@ -1,102 +1,70 @@
 package com.exxeta.configservice;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Inject;
 
+/**
+ * Accessing properties should by achieved by simply injecting the desired property/field. However, there are some use-cases where you should access ConfigurationService directly:
+ * <ul>
+ * <li>you need to ensure to always retrieve the latest version of a property (remember: e.g. if you are running in ApplicationScope properties will not be re-injected)</li>
+ * <li>you need to write/update a property</li>
+ * </ul>
+ */
 public class ConfigurationService {
 
 	@Inject
-	private ConfigurationStore store;
-	
+	private ConfigurationEntryDAO dao;
+
+	@Inject
+	private ConfigurationEntityValidator validator;
+
 	/**
-	 * Liefert den Wert zu der gesuchten Property. Ist die Property noch nicht in der DB hinterlegt, wird diese dort mit ihrem Default-Wert
-	 * neu angelegt und dieser Wert zurueckgegeben.
+	 * Retrieves the property from the data-store. If the property is not found, a null value will be stored in the data-stored and returned.
+	 */
+	public <V> V readProperty(String propertyName, Class<V> propertyClass) {
+		return getOrCreateProperty(propertyName, propertyClass, null);
+	}
+
+	/**
+	 * Retrieves the property from the data-store. If the property is not found, the defaultValue will be stored in the data-stored and returned.
 	 */
 	public <V> V readProperty(String propertyName, Class<V> propertyClass, V defaultValue) {
 		return getOrCreateProperty(propertyName, propertyClass, defaultValue);
 	}
 
 	/**
-	 * Liefert den Wert zu der gesuchten Property. Ist die Property noch nicht in der DB hinterlegt, wird diese dort leer angelegt und null
-	 * zurueckgegeben.
-	 */
-	public <V> V readProperty(String propertyName, Class<V> propertyClass) {
-		return getOrCreateProperty(propertyName, propertyClass, null);
-	}
-    
-    /**
-	 * Schreibt die definierte Property mit Wert in die DB. Ist die Property bereits vorhanden, wird diese vollstaendig ersetzt.
+	 * Writes the configuration property to the data-store. Existing values will be overwritten.
 	 */
 	public void writeProperty(String propertyName, Object value) {
-		writeProperty(propertyName, ConfigurationEntryBuilder.createConfig().value(value));
+		writeProperty(propertyName, ConfigurationEntityBuilder.createConfig().value(value));
 	}
 
 	/**
-	 * Schreibt die definierte Property mit Wert in die DB. Ist die Property bereits vorhanden, wird diese vollstaendig ersetzt.
+	 * Writes the configuration property to the data-store. Existing values will be overwritten.
 	 */
-	public void writeProperty(String propertyName, ConfigurationEntryBuilder configBuilder) {
-		store.writeProperty(propertyName, configBuilder);
+	public <T> void writeProperty(String propertyName, ConfigurationEntityBuilder<T> configBuilder) {
+		final ConfigurationEntity<T> entity = configBuilder.getConfigEntry();
+		validator.validate(entity, propertyName);
+		dao.save(propertyName, entity);
 	}
 
-	// ---------------------------------------------
-	// CDI Producer
-	// ---------------------------------------------
+	<T> T getOrCreateProperty(String propertyName, Class<T> propertyClass, T defaultValue) {
+		T value = read(propertyName, propertyClass);
+		if (isNull(value) && !isNull(defaultValue)) {
+			writeProperty(propertyName, ConfigurationEntityBuilder.createConfig().value(defaultValue));
+		}
 
-	@Produces
-	@Property
-	protected Integer lookupIntegerProperty(InjectionPoint ip) {
-		IntegerProperty property = ip.getAnnotated().getAnnotation(IntegerProperty.class);
-		return getOrCreateProperty(property.key(), Integer.class, property.defaultValue());
+		return !isNull(value) ? value : (!isNull(defaultValue) ? defaultValue : null);
 	}
 
-	@Produces
-	@Property
-	protected Double lookupDoubleProperty(InjectionPoint ip) {
-		DoubleProperty property = ip.getAnnotated().getAnnotation(DoubleProperty.class);
-		return getOrCreateProperty(property.key(), Double.class, property.defaultValue());
+	private <V> V read(String propertyName, Class<V> propertyClass) {
+		ConfigurationEntity<V> entity = dao.load(propertyName, propertyClass);
+		if (entity == null) {
+			return null;
+		}
+
+		return validator.validate(entity, propertyName);
 	}
 
-	@Produces
-	@Property
-	protected String lookupStringProperty(InjectionPoint ip) {
-		StringProperty property = ip.getAnnotated().getAnnotation(StringProperty.class);
-		return getOrCreateProperty(property.key(), String.class, property.defaultValue());
-	}
-
-	@Produces
-	@Property
-	protected Boolean lookupBooleanProperty(InjectionPoint ip) {
-		BooleanProperty property = ip.getAnnotated().getAnnotation(BooleanProperty.class);
-		return getOrCreateProperty(property.key(), Boolean.class, property.defaultValue());
-	}
-
-	@Produces
-	@Property
-	@SuppressWarnings("unchecked")
-	protected <T> PropertyObject<T> lookupObjectProperty(InjectionPoint ip) {
-		ObjectProperty property = ip.getAnnotated().getAnnotation(ObjectProperty.class);
-		Type beanType = ((ParameterizedType) ip.getType()).getActualTypeArguments()[0];
-
-		T value = getOrCreateProperty(property.key(), (Class<T>) beanType, null);
-		return new PropertyObject<T>(property.key(), value);
-	}
-
-	/**
-	 * Laedt die Property aus der DB. Falls die Property noch nicht hinterlegt ist, wird jetzt der defaultValue dort gespeichert.
-	 */
-	protected <T> T getOrCreateProperty(String propertyName, Class<T> propertyClass, T defaultValue) {
-			T value = store.readProperty(propertyName, propertyClass);			
-			if (isNull(value) && !isNull(defaultValue)) {
-				store.writeProperty(propertyName, ConfigurationEntryBuilder.createConfig().value(defaultValue));
-			}
-
-			return !isNull(value) ? value : (!isNull(defaultValue) ? defaultValue : null);
-	}
-    
 	private static boolean isNull(Object value) {
 		return (value instanceof String) ? String.valueOf(value).trim().equals("") : (value == null);
 	}
