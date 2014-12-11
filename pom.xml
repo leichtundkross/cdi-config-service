@@ -7,6 +7,7 @@
 	<packaging>pom</packaging>
 	<modules>
 		<module>configservice-core</module>
+		<module>configservice-mongodb</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
