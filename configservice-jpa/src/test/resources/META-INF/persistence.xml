@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+	version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
+	<persistence-unit name="configservice">
+		<class>com.github.leichtundkross.configservice.AbstractJPAConfigurationEntity</class>
+		<class>com.github.leichtundkross.configservice.StringJPAConfigurationEntity</class>
+		<exclude-unlisted-classes />
+		<properties>
+			<property name="hibernate.connection.url"
+				value="jdbc:h2:mem:jpa-configservice-test;DB_CLOSE_DELAY=-1;MVCC=true" />
+			<property name="hibernate.connection.driver_class" value="org.h2.Driver" />
+			<property name="hibernate.id.new_generator_mappings" value="false" />
+			<property name="hibernate.hbm2ddl.auto" value="create-drop" />
+			<property name="hibernate.show_sql" value="true" />
+		</properties>
+	</persistence-unit>
+</persistence>

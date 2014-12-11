@@ -5,72 +5,27 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.mongodb.morphia.Datastore;
-import org.mongodb.morphia.Morphia;
-
-import com.mongodb.MongoClient;
-
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.IMongodConfig;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.runtime.Network;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MongoDBConfigurationEntryDAOTest {
+public class JPAConfigurationEntryDAOTest {
 
 	@InjectMocks
-	private MongoDBConfigurationEntryDAO dao;
+	private JPAConfigurationEntryDAO dao;
 
 	@Spy
-	private static Datastore ds;
-
-	private static MongodExecutable mongodExecutable;
-
-	@BeforeClass
-	public static void startMongo() {
-		MongodStarter starter = MongodStarter.getDefaultInstance();
-		int port = 37017;
-		try {
-			IMongodConfig mongodConfig = new MongodConfigBuilder().version(Version.Main.PRODUCTION).net(new Net(port, Network.localhostIsIPv6())).build();
-			mongodExecutable = starter.prepare(mongodConfig);
-			mongodExecutable.start();
-
-			MongoClient mongo = new MongoClient("localhost", port);
-			Morphia morphia = new Morphia();
-			morphia.map(MongoDBConfigurationEntity.class);
-			ds = morphia.createDatastore(mongo, "test");
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	@AfterClass
-	public static void shutdownMongo() {
-		if (mongodExecutable != null) {
-			mongodExecutable.stop();
-		}
-	}
-
-	@Before
-	public void cleanDB() {
-		ds.delete(ds.createQuery(MongoDBConfigurationEntity.class));
-	}
+	private EntityManager em = Persistence.createEntityManagerFactory("configservice").createEntityManager();
 
 	@Test
 	public void saveAndLoad() {
