@@ -3,7 +3,6 @@ package com.github.leichtundkross.configservice;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -21,8 +20,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
-import com.github.leichtundkross.configservice.MongoDBConfigurationEntity;
-import com.github.leichtundkross.configservice.MongoDBConfigurationEntryDAO;
 import com.mongodb.MongoClient;
 
 import de.flapdoodle.embed.mongo.MongodExecutable;
@@ -55,7 +52,7 @@ public class MongoDBConfigurationEntryDAOTest {
 
 			MongoClient mongo = new MongoClient("localhost", port);
 			Morphia morphia = new Morphia();
-			morphia.map(MongoDBConfigurationEntity.class);
+			morphia.map(ConfigEntry.class);
 			ds = morphia.createDatastore(mongo, "test");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -71,84 +68,68 @@ public class MongoDBConfigurationEntryDAOTest {
 
 	@Before
 	public void cleanDB() {
-		ds.delete(ds.createQuery(MongoDBConfigurationEntity.class));
+		ds.delete(ds.createQuery(ConfigEntry.class));
 	}
 
 	@Test
 	public void saveAndLoad() {
-		ConfigurationEntity<String> entity = dao.load("app.domain.property1", String.class);
-		assertNull(entity);
+		String value = dao.load("app.domain.property1", String.class);
+		assertNull(value);
 
-		dao.save("app.domain.property1", ConfigurationEntityBuilder.<String> createConfig().value("propValue").getConfigEntry());
+		dao.save("app.domain.property1", "propValue");
 
-		entity = dao.load("app.domain.property1", String.class);
-		assertNotNull(entity);
-		assertEquals("propValue", entity.getEntries().get(0).getValue());
-	}
-
-	@Test
-	public void saveAndLoad_withValidFrom() {
-		final Date validFrom = new GregorianCalendar(2014, Calendar.MARCH, 27).getTime();
-		final Date validTo = new GregorianCalendar(2014, Calendar.MARCH, 29).getTime();
-
-		ConfigurationEntity<String> entity = dao.load("app.domain.property1", String.class);
-		assertNull(entity);
-
-		dao.save("app.domain.property1", ConfigurationEntityBuilder.<String> createConfig().value("propValue").validFrom(validFrom).validTo(validTo)
-				.getConfigEntry());
-
-		entity = dao.load("app.domain.property1", String.class);
-		assertNotNull(entity);
-		assertEquals("propValue", entity.getEntries().get(0).getValue());
+		value = dao.load("app.domain.property1", String.class);
+		assertNotNull(value);
+		assertEquals("propValue", value);
 	}
 
 	@Test
 	public void saveAndLoad_integr() {
-		ConfigurationEntity<Integer> entity = dao.load("app.domain.property1", Integer.class);
-		assertNull(entity);
+		Integer value = dao.load("app.domain.property1", Integer.class);
+		assertNull(value);
 
-		dao.save("app.domain.property1", ConfigurationEntityBuilder.<Integer> createConfig().value(1234).getConfigEntry());
+		dao.save("app.domain.property1", 1234);
 
-		entity = dao.load("app.domain.property1", Integer.class);
-		assertNotNull(entity);
-		assertEquals(Integer.valueOf(1234), entity.getEntries().get(0).getValue());
+		value = dao.load("app.domain.property1", Integer.class);
+		assertNotNull(value);
+		assertEquals(Integer.valueOf(1234), value);
 	}
 
 	@Test
 	public void saveAndLoad_double() {
-		ConfigurationEntity<Double> entity = dao.load("app.domain.property1", Double.class);
-		assertNull(entity);
+		Double value = dao.load("app.domain.property1", Double.class);
+		assertNull(value);
 
-		dao.save("app.domain.property1", ConfigurationEntityBuilder.<Double> createConfig().value(1.234d).getConfigEntry());
+		dao.save("app.domain.property1", 1.234d);
 
-		entity = dao.load("app.domain.property1", Double.class);
-		assertNotNull(entity);
-		assertEquals(Double.valueOf(1.234d), entity.getEntries().get(0).getValue());
+		value = dao.load("app.domain.property1", Double.class);
+		assertNotNull(value);
+		assertEquals(Double.valueOf(1.234d), value);
 	}
 
 	@Test
 	public void saveAndLoad_boolean() {
-		ConfigurationEntity<Boolean> entity = dao.load("app.domain.property1", Boolean.class);
-		assertNull(entity);
+		Boolean value = dao.load("app.domain.property1", Boolean.class);
+		assertNull(value);
 
-		dao.save("app.domain.property1", ConfigurationEntityBuilder.<Boolean> createConfig().value(true).getConfigEntry());
+		dao.save("app.domain.property1", true);
 
-		entity = dao.load("app.domain.property1", Boolean.class);
-		assertNotNull(entity);
-		assertTrue(entity.getEntries().get(0).getValue());
+		value = dao.load("app.domain.property1", Boolean.class);
+		assertNotNull(value);
+		assertEquals(Boolean.TRUE, value);
 	}
 
 	@Test
 	public void saveAndLoad_date() {
 		final Date dateValue = new GregorianCalendar(2014, Calendar.MARCH, 27).getTime();
 
-		ConfigurationEntity<Date> entity = dao.load("app.domain.property1", Date.class);
-		assertNull(entity);
+		Date value = dao.load("app.domain.property1", Date.class);
+		assertNull(value);
 
-		dao.save("app.domain.property1", ConfigurationEntityBuilder.<Date> createConfig().value(dateValue).getConfigEntry());
+		dao.save("app.domain.property1", dateValue);
 
-		entity = dao.load("app.domain.property1", Date.class);
-		assertNotNull(entity);
-		assertEquals(dateValue, entity.getEntries().get(0).getValue());
+		value = dao.load("app.domain.property1", Date.class);
+		assertNotNull(value);
+		assertEquals(dateValue, value);
 	}
 }

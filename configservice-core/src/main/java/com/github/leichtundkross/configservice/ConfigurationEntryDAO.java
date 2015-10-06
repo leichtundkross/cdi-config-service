@@ -5,7 +5,7 @@ package com.github.leichtundkross.configservice;
  */
 public interface ConfigurationEntryDAO {
 
-	<T> void save(String propertyName, ConfigurationEntity<T> entity);
+	<T> void save(String propertyName, T value);
 
-	<T> ConfigurationEntity<T> load(String propertyName, Class<T> propertyClass);
+	<T> T load(String propertyName, Class<T> propertyClass);
 }

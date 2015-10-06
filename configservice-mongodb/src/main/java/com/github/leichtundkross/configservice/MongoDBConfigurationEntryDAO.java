@@ -13,14 +13,36 @@ public class MongoDBConfigurationEntryDAO implements ConfigurationEntryDAO {
 	private Datastore ds;
 
 	@Override
+	public <T> void save(String propertyName, T value) {
+		final ConfigEntry<T> mongoEntity = new ConfigEntry<>(propertyName, value);
+		ConfigEntry<T> existingEntity = findExistingEntry(propertyName);
+		insertOrUpdate(mongoEntity, existingEntity);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T load(String propertyName, Class<T> propertyClass) {
+		ConfigEntry<T> entity = queryForConfigEntry(propertyName).get();
+		if (entity == null) {
+			return null;
+		}
+
+		return entity.getValue();
+	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public <T> void save(String propertyName, ConfigurationEntity<T> entity) {
-		final MongoDBConfigurationEntity<T> mongoEntity = new MongoDBConfigurationEntity<>(propertyName, entity);
-		// search for existing entry
-		Query<MongoDBConfigurationEntity> query = ds.createQuery(MongoDBConfigurationEntity.class).field(MongoDBConfigurationEntity.PROPERTY_NAME)
-				.equal(propertyName);
-		query.retrievedFields(true, "_id", "_version", MongoDBConfigurationEntity.PROPERTY_NAME);
-		MongoDBConfigurationEntity<T> existingEntity = query.get();
+	private <T> ConfigEntry<T> findExistingEntry(String propertyName) {
+		Query<ConfigEntry> query = queryForConfigEntry(propertyName);
+		query.retrievedFields(true, "_id", "_version", ConfigEntry.PROPERTY_NAME);
+		return query.get();
+	}
+
+	@SuppressWarnings("rawtypes")
+	private Query<ConfigEntry> queryForConfigEntry(String propertyName) {
+		return ds.createQuery(ConfigEntry.class).field(ConfigEntry.PROPERTY_NAME).equal(propertyName);
+	}
+
+	private <T> void insertOrUpdate(final ConfigEntry<T> mongoEntity, ConfigEntry<T> existingEntity) {
 		if (existingEntity == null) {
 			ds.save(mongoEntity);
 		} else {
@@ -28,19 +50,11 @@ public class MongoDBConfigurationEntryDAO implements ConfigurationEntryDAO {
 		}
 	}
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> ConfigurationEntity<T> load(String propertyName, Class<T> propertyClass) {
-		MongoDBConfigurationEntity<T> entity = ds.createQuery(MongoDBConfigurationEntity.class).field(MongoDBConfigurationEntity.PROPERTY_NAME)
-				.equal(propertyName).get();
-		return (ConfigurationEntity<T>) entity;
-	}
-
 	/**
 	 * Merges the new entity into the existing one which means that the existing DB entry will be totally replaced beside the object id.
 	 */
-	private <T> void merge(MongoDBConfigurationEntity<T> entity, MongoDBConfigurationEntity<T> existingEntity) {
-		Long version = entity.getVersion();
+	private <T> void merge(ConfigEntry<T> updatedEntity, ConfigEntry<T> existingEntity) {
+		Long version = updatedEntity.getVersion();
 		if (version == null) {
 			version = existingEntity.getVersion();
 		}
@@ -49,9 +63,8 @@ public class MongoDBConfigurationEntryDAO implements ConfigurationEntryDAO {
 			throw new MongoException("Missing version for entity " + existingEntity.getId());
 		}
 
-		entity.setId(existingEntity.getId());
-		entity.setVersion(version);
-		ds.merge(entity);
+		updatedEntity.setId(existingEntity.getId());
+		updatedEntity.setVersion(version);
+		ds.merge(updatedEntity);
 	}
-
 }
