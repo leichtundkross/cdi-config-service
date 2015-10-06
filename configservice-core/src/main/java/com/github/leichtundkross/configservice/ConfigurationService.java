@@ -14,9 +14,6 @@ public class ConfigurationService {
 	@Inject
 	private ConfigurationEntryDAO dao;
 
-	@Inject
-	private ConfigurationEntityValidator validator;
-
 	/**
 	 * Retrieves the property from the data-store. If the property is not found, a null value will be stored in the data-stored and returned.
 	 */
@@ -34,35 +31,22 @@ public class ConfigurationService {
 	/**
 	 * Writes the configuration property to the data-store. Existing values will be overwritten.
 	 */
-	public void writeProperty(String propertyName, Object value) {
-		writeProperty(propertyName, ConfigurationEntityBuilder.createConfig().value(value));
-	}
-
-	/**
-	 * Writes the configuration property to the data-store. Existing values will be overwritten.
-	 */
-	public <T> void writeProperty(String propertyName, ConfigurationEntityBuilder<T> configBuilder) {
-		final ConfigurationEntity<T> entity = configBuilder.getConfigEntry();
-		validator.validate(entity, propertyName);
-		dao.save(propertyName, entity);
+	public <T> void writeProperty(String propertyName, T value) {
+		dao.save(propertyName, value);
 	}
 
 	<T> T getOrCreateProperty(String propertyName, Class<T> propertyClass, T defaultValue) {
 		T value = read(propertyName, propertyClass);
 		if (isNull(value) && !isNull(defaultValue)) {
-			writeProperty(propertyName, ConfigurationEntityBuilder.createConfig().value(defaultValue));
+			writeProperty(propertyName, defaultValue);
 		}
 
 		return !isNull(value) ? value : (!isNull(defaultValue) ? defaultValue : null);
 	}
 
 	private <V> V read(String propertyName, Class<V> propertyClass) {
-		ConfigurationEntity<V> entity = dao.load(propertyName, propertyClass);
-		if (entity == null) {
-			return null;
-		}
-
-		return validator.validate(entity, propertyName);
+		V entity = dao.load(propertyName, propertyClass);
+		return entity;
 	}
 
 	private static boolean isNull(Object value) {

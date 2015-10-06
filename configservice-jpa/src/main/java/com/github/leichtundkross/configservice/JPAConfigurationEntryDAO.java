@@ -12,20 +12,20 @@ public class JPAConfigurationEntryDAO implements ConfigurationEntryDAO {
 	private EntityManager em;
 
 	@Override
-	public <T> void save(String propertyName, ConfigurationEntity<T> entity) {
+	public <T> void save(String propertyName, T value) {
 		StringJPAConfigurationEntity jpaEntity = new StringJPAConfigurationEntity();
 		jpaEntity.setName(propertyName);
-		jpaEntity.setStringValue(entity.getEntries().get(0).getValue().toString());
+		jpaEntity.setStringValue(value.toString());
 		em.merge(jpaEntity);
 	}
 
 	@Override
-	public <T> ConfigurationEntity<T> load(String propertyName, Class<T> propertyClass) {
+	public <T> T load(String propertyName, Class<T> propertyClass) {
 		StringJPAConfigurationEntity jpaEntity = em.find(StringJPAConfigurationEntity.class, propertyName);
 		if (jpaEntity == null) {
 			return null;
 		}
-
-		return (ConfigurationEntity<T>) ConfigurationEntityBuilder.createConfig().value(jpaEntity.getStringValue()).getConfigEntry();
+		
+		return (T) jpaEntity.getStringValue();
 	}
 }
