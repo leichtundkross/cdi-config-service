@@ -32,6 +32,10 @@ public class ConfigurationService {
 	 * Writes the configuration property to the data-store. Existing values will be overwritten.
 	 */
 	public <T> void writeProperty(String propertyName, T value) {
+		if (value == null) {
+			throw new IllegalArgumentException("Null value is not allowed for property " + propertyName);
+		}
+
 		dao.save(propertyName, value);
 	}
 

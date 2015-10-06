@@ -45,4 +45,11 @@ public class ConfigurationServiceTest {
 
 		Mockito.verify(dao).save(PROP_KEY, "myProperty");
 	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void writeProperty_NullValue() {
+		configService.writeProperty(PROP_KEY, null);
+
+		Mockito.verify(dao, Mockito.never()).save(Matchers.anyString(), Matchers.any(String.class));
+	}
 }

@@ -17,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.github.leichtundkross.MySerializable;
+
 @RunWith(MockitoJUnitRunner.class)
 public class JPAConfigurationEntryDAOTest {
 
@@ -25,6 +27,9 @@ public class JPAConfigurationEntryDAOTest {
 
 	@Spy
 	private EntityManager em = Persistence.createEntityManagerFactory("configservice").createEntityManager();
+
+	@Spy
+	private ConfigEntryFactory f;
 
 	@Test
 	public void saveAndLoad() {
@@ -86,5 +91,24 @@ public class JPAConfigurationEntryDAOTest {
 		value = dao.load("app.domain.property1", Date.class);
 		assertNotNull(value);
 		assertEquals(dateValue, value);
+	}
+
+	@Test
+	public void saveAndLoad_Serializable() {
+		final MySerializable serializable = new MySerializable("class uses java serialization");
+
+		MySerializable value = dao.load("app.domain.property1", MySerializable.class);
+		assertNull(value);
+
+		dao.save("app.domain.property1", serializable);
+
+		value = dao.load("app.domain.property1", MySerializable.class);
+		assertNotNull(value);
+		assertEquals(serializable.getAnotherString(), value.getAnotherString());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void saveAndLoad_Object_NotSupported() {
+		dao.load("app.domain.property1", Object.class);
 	}
 }

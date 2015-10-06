@@ -3,8 +3,13 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
 	version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
 	<persistence-unit name="configservice">
-		<class>com.github.leichtundkross.configservice.AbstractJPAConfigurationEntity</class>
-		<class>com.github.leichtundkross.configservice.StringJPAConfigurationEntity</class>
+		<class>com.github.leichtundkross.configservice.AbstractConfigEntry</class>
+		<class>com.github.leichtundkross.configservice.BooleanConfigEntry</class>
+		<class>com.github.leichtundkross.configservice.DateConfigEntry</class>
+		<class>com.github.leichtundkross.configservice.DoubleConfigEntry</class>
+		<class>com.github.leichtundkross.configservice.IntegerConfigEntry</class>
+		<class>com.github.leichtundkross.configservice.SerializableConfigEntry</class>
+		<class>com.github.leichtundkross.configservice.StringConfigEntry</class>
 		<exclude-unlisted-classes />
 		<properties>
 			<property name="hibernate.connection.url"
