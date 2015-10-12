@@ -31,7 +31,7 @@ import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.process.runtime.Network;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MongoDBConfigurationEntryDAOTest {
+public class MongoDBConfigurationEntryDAOIT {
 
 	@InjectMocks
 	private MongoDBConfigurationEntryDAO dao;

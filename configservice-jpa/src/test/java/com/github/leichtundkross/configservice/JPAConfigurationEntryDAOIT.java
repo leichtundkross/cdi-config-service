@@ -20,7 +20,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.leichtundkross.MySerializable;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JPAConfigurationEntryDAOTest {
+public class JPAConfigurationEntryDAOIT {
 
 	@InjectMocks
 	private JPAConfigurationEntryDAO dao;
@@ -29,7 +29,7 @@ public class JPAConfigurationEntryDAOTest {
 	private EntityManager em = Persistence.createEntityManagerFactory("configservice").createEntityManager();
 
 	@Spy
-	private ConfigEntryFactory f;
+	private ConfigEntryFactory configEntryFactory;
 
 	@Test
 	public void saveAndLoad() {
