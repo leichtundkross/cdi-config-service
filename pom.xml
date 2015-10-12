@@ -9,6 +9,7 @@
 		<module>configservice-core</module>
 		<module>configservice-mongodb</module>
 		<module>configservice-jpa</module>
+		<module>configservice-sample</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
